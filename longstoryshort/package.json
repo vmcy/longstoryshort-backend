@@ -1,0 +1,19 @@
+{
+  "name": "longstoryshort-backend",
+  "version": "1.0.0",
+  "description": "URL Shortener backend with NodeJS",
+  "main": "app.js",
+  "repository": "https://github.com/vmcy/longstoryshort-backend.git",
+  "author": "vmcy",
+  "license": "MIT",
+  "dependencies": {
+    "axios": ">=1.6.0"
+  },
+  "scripts": {
+    "test": "mocha tests/unit/"
+  },
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "mocha": "^10.2.0"
+  }
+}

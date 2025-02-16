@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+
+  URL Shortener backend with NodeJS
+  
+Globals:
+  Function:
+    Runtime: nodejs22.x
+    Timeout: 600
+
+Resources:
+  ShortenUrlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: longstoryshort/
+      Handler: app.shortenUrl
+      Architectures:
+        - x86_64
+      Events:
+        ShortenUrl:
+          Type: Api
+          Properties:
+            Path: /surl
+            Method: get
+  ExpandUrlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: longstoryshort/
+      Handler: app.expandUrl
+      Architectures:
+        - x86_64
+      Events:
+        ShortenUrl:
+          Type: Api
+          Properties:
+            Path: /eurl
+            Method: get
+
+Outputs:
+  ShortenUrlApi:
+    Description: "API Gateway endpoint URL for Prod stage for ShortenUrl function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/surl/"
+  ShortenUrlFunction:
+    Description: "ShortenUrl Lambda Function ARN"
+    Value: !GetAtt ShortenUrlFunction.Arn
+  ShortenUrlFunctionIamRole:
+    Description: "Implicit IAM Role created for ShortenUrl function"
+    Value: !GetAtt ShortenUrlFunctionRole.Arn
+  ExpandUrlApi:
+    Description: "API Gateway endpoint URL for Prod stage for ExpandUrl function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/eurl/"
+  ExpandUrlFunction:
+    Description: "ExpandUrl Lambda Function ARN"
+    Value: !GetAtt ExpandUrlFunction.Arn
+  ExpandUrlFunctionIamRole:
+    Description: "Implicit IAM Role created for ExpandUrl function"
+    Value: !GetAtt ExpandUrlFunctionRole.Arn
