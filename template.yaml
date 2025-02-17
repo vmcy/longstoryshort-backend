@@ -17,6 +17,9 @@ Resources:
       Handler: app.shortenUrl
       Architectures:
         - x86_64
+      Policies:
+       - DynamoDBCrudPolicy:
+          TableName: !Ref UrlShortenerTable
       Events:
         ShortenUrl:
           Type: Api
@@ -30,12 +33,34 @@ Resources:
       Handler: app.expandUrl
       Architectures:
         - x86_64
+      Policies:
+       - DynamoDBCrudPolicy:
+          TableName: !Ref UrlShortenerTable
       Events:
         ShortenUrl:
           Type: Api
           Properties:
             Path: /eurl
             Method: get
+   UrlShortenerTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: UrlShortenerTable
+      AttributeDefinitions:
+        - AttributeName: ShortId
+          AttributeType: S
+        - AttributeName: OriginalUrl
+          AttributeType: S
+        - AttributeName: CreatedTimestamp
+          AttributeType: N
+        - AttributeName: ExpiryTimestamp
+          AttributeType: N
+      KeySchema:
+        - AttributeName: ShortId
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
 
 Outputs:
   ShortenUrlApi:
