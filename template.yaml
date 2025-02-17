@@ -22,7 +22,7 @@ Resources:
           Type: Api
           Properties:
             Path: /surl
-            Method: get
+            Method: post
   ExpandUrlFunction:
     Type: AWS::Serverless::Function
     Properties:
