@@ -1,5 +1,7 @@
 {
-  "body": "{\"message\": \"Shortern URL Success\"}",
+  "body": {
+    "url": "https://forum.lowyat.net"
+  },
   "resource": "/{proxy+}",
   "path": "/path/to/resource",
   "httpMethod": "POST",
