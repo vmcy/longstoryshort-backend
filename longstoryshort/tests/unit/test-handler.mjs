@@ -2,12 +2,15 @@
 
 import { shortenUrl, expandUrl } from '../../app.mjs';
 import { expect } from 'chai';
+import event_short_valid_url from '../../../events/event_short_valid_url.json' with { type: 'json' };
+
+// Placeholder
 var event, context;
 
 describe('Shorten URL', function () {
     // Should shorten valid URL
     it('verifies successful response', async () => {
-        const response = await shortenUrl(event, context)
+        const response = await shortenUrl(event_short_valid_url, context)
         expect(response).to.be.an('object');
         expect(response.statusCode).to.equal(200);
         expect(response.body).to.be.an('string');
@@ -19,7 +22,7 @@ describe('Shorten URL', function () {
 
         let data = result.data;
         expect(data).to.be.an('object');
-        expect(data.originalUrl).to.be.equal(event.body.originalUrl);
+        expect(data.originalUrl).to.be.equal(event_short_valid_url.body.url);
         expect(data.shortUrl).to.be.an('string');
         expect(data.shortUrl).to.have.length.above(1);
     });
