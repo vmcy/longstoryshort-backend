@@ -2,8 +2,14 @@
 
 import { shortenUrl, expandUrl } from '../../app.mjs';
 import { expect } from 'chai';
+
 import event_short_valid_url from '../../../events/event_short_valid_url.json' with { type: 'json' };
+import event_short_missing_url from '../../../events/event_short_missing_url.json' with { type: 'json' };
+import event_short_invalid_url from '../../../events/event_short_invalid_url.json' with { type: 'json' };
+
 import event_expand_valid_url from '../../../events/event_expand_valid_url.json' with { type: 'json' };
+import event_expand_missing_url from '../../../events/event_expand_missing_url.json' with { type: 'json' };
+import event_expand_nonexistent_url from '../../../events/event_expand_nonexistent_url.json' with { type: 'json' };
 
 // Placeholder
 var event, context;
@@ -30,7 +36,7 @@ describe('Shorten URL', function () {
 
     // Should throw error for missing original URL
     it('verifies missing original url response', async () => {
-        const response = await shortenUrl(event, context)
+        const response = await shortenUrl(event_short_missing_url, context)
         expect(response).to.be.an('object');
         expect(response.statusCode).to.equal(400);
         expect(response.body).to.be.an('string');
@@ -43,7 +49,7 @@ describe('Shorten URL', function () {
 
     // Should throw error for invalid original URL
     it('verifies invalid original url response', async () => {
-        const response = await shortenUrl(event, context)
+        const response = await shortenUrl(event_short_invalid_url, context)
         expect(response).to.be.an('object');
         expect(response.statusCode).to.equal(422);
         expect(response.body).to.be.an('string');
@@ -78,7 +84,7 @@ describe('Expand URL', function () {
 
     // Should throw error for missing short URL ID
     it('verifies missing short url response', async () => {
-        const response = await expandUrl(event, context)
+        const response = await expandUrl(event_expand_missing_url, context)
         expect(response).to.be.an('object');
         expect(response.statusCode).to.equal(400);
         expect(response.body).to.be.an('string');
@@ -91,7 +97,7 @@ describe('Expand URL', function () {
 
     // Should throw error for non-existent short URL
     it('verifies non-existent short url response', async () => {
-        const response = await expandUrl(event_short_valid_url, context)
+        const response = await expandUrl(event_expand_nonexistent_url, context)
         expect(response).to.be.an('object');
         expect(response.statusCode).to.equal(404);
         expect(response.body).to.be.an('string');
