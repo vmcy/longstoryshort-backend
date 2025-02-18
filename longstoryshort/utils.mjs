@@ -15,7 +15,7 @@ export function hasRequiredProperty(body, property) {
     return body && body.hasOwnProperty(property);
 }
 
-// Generate an 8-character Base62 ID
+// Generate an 8-character Base36 ID
 export function generateUniqueID() {
     // Generate 8 random bytes (64 bits)
     const randomBuffer = randomBytes(8);
@@ -24,7 +24,7 @@ export function generateUniqueID() {
     const base36Chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
     let id = '';
     for (let byte of randomBuffer) {
-        id += base36Chars[byte % 36]; // Use each byte's value to index into Base62 characters
+        id += base36Chars[byte % 36]; // Use each byte's value to index into Base36 characters
     }
 
     return id;
