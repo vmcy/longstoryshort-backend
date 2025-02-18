@@ -1,6 +1,6 @@
 import { isValidUrl, hasRequiredProperty, generateUniqueID } from './utils.mjs';
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { PutCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 
 import config from './config.mjs';
 
@@ -77,13 +77,68 @@ export const shortenUrl = async (event, context) => {
 };
 
 export const expandUrl = async (event, context) => {
-  const response = {
-    statusCode: 200,
-    body: JSON.stringify({
-      messageCode: 0,
-      message: 'Expand URL',
-    })
-  };
+  let queryStringParameters;
+  let shortId;
 
-  return response;
+  if (typeof event.queryStringParameters === 'string') {
+    queryStringParameters = JSON.parse(event.queryStringParameters);
+  } else {
+    queryStringParameters = event.queryStringParameters;
+  }
+
+  if (!hasRequiredProperty(queryStringParameters, 'shortid')) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        messageCode: 1,
+        message: "missing required field: shortid"
+      })
+    };
+  }
+
+  shortId = queryStringParameters.shortid;
+
+  const ddbGetCommand = new GetCommand({
+    TableName: "UrlShortenerTable",
+    Key: {
+      ShortId: shortId,
+    },
+  });
+
+  try {
+    const response = await ddbDocClient.send(ddbGetCommand);
+
+    if (!hasRequiredProperty(response, 'Item')) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({
+          messageCode: 3,
+          message: "non-existent short url provided"
+        })
+      };
+    }
+
+    let item = response.Item;
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        messageCode: 0,
+        message: 'URL successfully expanded',
+        data: {
+          shortId: shortId,
+          expandUrl: item.OriginalUrl
+        }
+      })
+    };
+  } catch (error) {
+    console.error('Error getting item: ', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        messageCode: 99,
+        message: `unexpected error: ${error.stack}`,
+      })
+    };
+  }
 };
