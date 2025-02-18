@@ -60,7 +60,7 @@ export const shortenUrl = async (event, context) => {
         message: 'URL successfully shortened',
         data: {
           originalUrl: originalUrl,
-          shortUrl: `${config.DOMAIN}/${generateUniqueID()}`
+          shortUrl: `${config.DOMAIN}/${shortUrlId}`
         }
       })
     };
