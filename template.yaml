@@ -42,19 +42,13 @@ Resources:
           Properties:
             Path: /eurl
             Method: get
-   UrlShortenerTable:
+  UrlShortenerTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: UrlShortenerTable
       AttributeDefinitions:
         - AttributeName: ShortId
           AttributeType: S
-        - AttributeName: OriginalUrl
-          AttributeType: S
-        - AttributeName: CreatedTimestamp
-          AttributeType: N
-        - AttributeName: ExpiryTimestamp
-          AttributeType: N
       KeySchema:
         - AttributeName: ShortId
           KeyType: HASH
