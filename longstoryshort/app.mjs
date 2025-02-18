@@ -46,8 +46,8 @@ export const shortenUrl = async (event, context) => {
     Item: {
       ShortId: shortUrlId,
       OriginalUrl: originalUrl,
-      CreatedTimestamp: Date.now(),
-      ExpiryTimestamp: Date.now() + config.DEFAULT_SHORT_URL_EXPIRY_DURATION_DAY * 24 * 60 * 60 * 1000
+      CreatedTimestamp: (Date.now() / 1000 | 0),
+      ExpiryTimestamp: ((Date.now() + config.DEFAULT_SHORT_URL_EXPIRY_DURATION_DAY * 24 * 60 * 60 * 1000) / 1000) | 0
     }
   });
 
