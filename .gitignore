@@ -131,3 +131,9 @@ dist
 
 # Mac
 .DS_Store
+
+# AWS SAM
+.aws-sam/
+packaged.yaml
+samconfig.toml
+*.db
