@@ -5,7 +5,7 @@
   "httpMethod": "POST",
   "isBase64Encoded": false,
   "queryStringParameters": {
-    "shortid": "vt81htph"
+    "shortid": "khk5tdv6"
   },
   "pathParameters": {
     "proxy": "/path/to/resource"
