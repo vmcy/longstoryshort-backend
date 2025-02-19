@@ -7,6 +7,12 @@ import config from './config.mjs';
 const ddbClient = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 
+const corsHeader = {
+  "Access-Control-Allow-Headers" : "Content-Type",
+  "Access-Control-Allow-Origin": config.DOMAIN, 
+  "Access-Control-Allow-Methods": "GET,POST,OPTIONS"
+}
+
 export const shortenUrl = async (event, context) => {
   let body;
   let originalUrl;
@@ -20,6 +26,7 @@ export const shortenUrl = async (event, context) => {
   if (!hasRequiredProperty(body, 'url')) {
     return {
       statusCode: 400,
+      headers: corsHeader,
       body: JSON.stringify({
         messageCode: 1,
         message: "missing required field: url"
@@ -32,6 +39,7 @@ export const shortenUrl = async (event, context) => {
   if (!isValidUrl(originalUrl)) {
     return {
       statusCode: 422,
+      headers: corsHeader,
       body: JSON.stringify({
         messageCode: 2,
         message: "invalid url provided"
@@ -55,6 +63,7 @@ export const shortenUrl = async (event, context) => {
     await ddbDocClient.send(ddbPutCommand);
     return {
       statusCode: 200,
+      headers: corsHeader,
       body: JSON.stringify({
         messageCode: 0,
         message: 'URL successfully shortened',
@@ -68,6 +77,7 @@ export const shortenUrl = async (event, context) => {
     console.error('Error inserting item: ', error);
     return {
       statusCode: 500,
+      headers: corsHeader,
       body: JSON.stringify({
         messageCode: 99,
         message: `unexpected error: ${error.stack}`,
@@ -89,6 +99,7 @@ export const expandUrl = async (event, context) => {
   if (!hasRequiredProperty(queryStringParameters, 'shortid')) {
     return {
       statusCode: 400,
+      headers: corsHeader,
       body: JSON.stringify({
         messageCode: 1,
         message: "missing required field: shortid"
@@ -111,6 +122,7 @@ export const expandUrl = async (event, context) => {
     if (!hasRequiredProperty(response, 'Item')) {
       return {
         statusCode: 404,
+        headers: corsHeader,
         body: JSON.stringify({
           messageCode: 3,
           message: "non-existent short url provided"
@@ -122,6 +134,7 @@ export const expandUrl = async (event, context) => {
 
     return {
       statusCode: 200,
+      headers: corsHeader,
       body: JSON.stringify({
         messageCode: 0,
         message: 'URL successfully expanded',
@@ -135,6 +148,7 @@ export const expandUrl = async (event, context) => {
     console.error('Error getting item: ', error);
     return {
       statusCode: 500,
+      headers: corsHeader,
       body: JSON.stringify({
         messageCode: 99,
         message: `unexpected error: ${error.stack}`,

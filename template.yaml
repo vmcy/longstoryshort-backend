@@ -1,13 +1,18 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
 
   URL Shortener backend with NodeJS
-  
+
 Globals:
   Function:
     Runtime: nodejs22.x
     Timeout: 600
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowHeaders: "'content-type'"
+      AllowOrigin: "'https://lss99.org'"
 
 Resources:
   ShortenUrlFunction:
@@ -18,8 +23,8 @@ Resources:
       Architectures:
         - x86_64
       Policies:
-       - DynamoDBCrudPolicy:
-          TableName: !Ref UrlShortenerTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UrlShortenerTable
       Events:
         ShortenUrl:
           Type: Api
@@ -34,8 +39,8 @@ Resources:
       Architectures:
         - x86_64
       Policies:
-       - DynamoDBCrudPolicy:
-          TableName: !Ref UrlShortenerTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UrlShortenerTable
       Events:
         ShortenUrl:
           Type: Api
