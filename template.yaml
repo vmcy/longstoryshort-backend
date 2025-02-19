@@ -11,8 +11,9 @@ Globals:
   Api:
     Cors:
       AllowMethods: "'GET,POST,OPTIONS'"
-      AllowHeaders: "'content-type'"
+      AllowHeaders: "'Content-Type,Authorization'"
       AllowOrigin: "'https://lss99.org'"
+      AllowCredentials: true
 
 Resources:
   # Cognito User Pool
@@ -69,6 +70,8 @@ Resources:
       StageName: Prod
       Auth:
         DefaultAuthorizer: LongStoryShortCognitoAuthorizer
+        AddDefaultAuthorizerToCorsPreflight: false
+        AddApiKeyRequiredToCorsPreflight: false
         Authorizers:
           LongStoryShortCognitoAuthorizer:
             UserPoolArn: !GetAtt LongStoryShortUserPool.Arn

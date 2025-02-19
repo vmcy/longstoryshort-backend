@@ -8,9 +8,10 @@ const ddbClient = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 
 const corsHeader = {
-  "Access-Control-Allow-Headers" : "Content-Type",
+  "Access-Control-Allow-Headers" : "Content-Type,Authorization",
   "Access-Control-Allow-Origin": config.DOMAIN, 
-  "Access-Control-Allow-Methods": "GET,POST,OPTIONS"
+  "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+  "Access-Control-Allow-Credentials": true
 }
 
 export const shortenUrl = async (event, context) => {
