@@ -15,6 +15,68 @@ Globals:
       AllowOrigin: "'https://lss99.org'"
 
 Resources:
+  # Cognito User Pool
+  LongStoryShortUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: LongStoryShortUserPool
+      AutoVerifiedAttributes:
+        - email
+
+  # Cognito User Pool Client (with secret, for token-based access)
+  LongStoryShortUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    DependsOn: LongStoryShortUserPoolResourceServer
+    Properties:
+      UserPoolId: !Ref LongStoryShortUserPool
+      ClientName: LongStoryShortUserPoolClient
+      GenerateSecret: true
+      AllowedOAuthFlows:
+        - client_credentials
+      AllowedOAuthScopes:
+        - longstoryshort-identifier/read
+        - longstoryshort-identifier/write
+      AllowedOAuthFlowsUserPoolClient: true
+      ExplicitAuthFlows:
+        - ALLOW_REFRESH_TOKEN_AUTH
+      RefreshTokenValidity: 5
+
+  # Cognito User Pool Resource Server
+  LongStoryShortUserPoolResourceServer:
+    Type: AWS::Cognito::UserPoolResourceServer
+    Properties:
+      Identifier: longstoryshort-identifier
+      Name: Long Story Short Resource Server
+      UserPoolId: !Ref LongStoryShortUserPool
+      Scopes:
+        - ScopeName: "write"
+          ScopeDescription: "Write access"
+        - ScopeName: "read"
+          ScopeDescription: "Read access"
+
+  # Cognito User Pool Domain
+  LongStoryShortUserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: "longstoryshort"
+      ManagedLoginVersion: 2
+      UserPoolId: !Ref LongStoryShortUserPool
+
+  # API Gateway with Cognito Authorizer
+  LongStoryShortApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Auth:
+        DefaultAuthorizer: LongStoryShortCognitoAuthorizer
+        Authorizers:
+          LongStoryShortCognitoAuthorizer:
+            UserPoolArn: !GetAtt LongStoryShortUserPool.Arn
+            AuthorizationScopes:
+              - longstoryshort-identifier/read
+              - longstoryshort-identifier/write
+
+  # Lambda
   ShortenUrlFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -29,8 +91,11 @@ Resources:
         ShortenUrl:
           Type: Api
           Properties:
+            RestApiId: !Ref LongStoryShortApi
             Path: /surl
             Method: post
+
+  # Lambda
   ExpandUrlFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -45,8 +110,11 @@ Resources:
         ShortenUrl:
           Type: Api
           Properties:
+            RestApiId: !Ref LongStoryShortApi
             Path: /eurl
             Method: get
+
+  # DynamoDB
   UrlShortenerTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -67,7 +135,7 @@ Resources:
 Outputs:
   ShortenUrlApi:
     Description: "API Gateway endpoint URL for Prod stage for ShortenUrl function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/surl/"
+    Value: !Sub "https://${LongStoryShortApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/surl/"
   ShortenUrlFunction:
     Description: "ShortenUrl Lambda Function ARN"
     Value: !GetAtt ShortenUrlFunction.Arn
@@ -76,7 +144,7 @@ Outputs:
     Value: !GetAtt ShortenUrlFunctionRole.Arn
   ExpandUrlApi:
     Description: "API Gateway endpoint URL for Prod stage for ExpandUrl function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/eurl/"
+    Value: !Sub "https://${LongStoryShortApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/eurl/"
   ExpandUrlFunction:
     Description: "ExpandUrl Lambda Function ARN"
     Value: !GetAtt ExpandUrlFunction.Arn
