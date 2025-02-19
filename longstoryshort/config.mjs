@@ -1,5 +1,5 @@
 const config = {
-    DOMAIN: 'https://longstoryshort.com',
+    DOMAIN: 'https://lss99.org',
     DEFAULT_SHORT_URL_EXPIRY_DURATION_DAY: 30
 };
 
