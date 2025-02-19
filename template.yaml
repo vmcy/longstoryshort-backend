@@ -1,0 +1,156 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+
+  URL Shortener backend with NodeJS
+
+Globals:
+  Function:
+    Runtime: nodejs22.x
+    Timeout: 600
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowHeaders: "'Content-Type,Authorization'"
+      AllowOrigin: "'https://lss99.org'"
+      AllowCredentials: true
+
+Resources:
+  # Cognito User Pool
+  LongStoryShortUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: LongStoryShortUserPool
+      AutoVerifiedAttributes:
+        - email
+
+  # Cognito User Pool Client (with secret, for token-based access)
+  LongStoryShortUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    DependsOn: LongStoryShortUserPoolResourceServer
+    Properties:
+      UserPoolId: !Ref LongStoryShortUserPool
+      ClientName: LongStoryShortUserPoolClient
+      GenerateSecret: true
+      AllowedOAuthFlows:
+        - client_credentials
+      AllowedOAuthScopes:
+        - longstoryshort-identifier/read
+        - longstoryshort-identifier/write
+      AllowedOAuthFlowsUserPoolClient: true
+      ExplicitAuthFlows:
+        - ALLOW_REFRESH_TOKEN_AUTH
+      RefreshTokenValidity: 5
+
+  # Cognito User Pool Resource Server
+  LongStoryShortUserPoolResourceServer:
+    Type: AWS::Cognito::UserPoolResourceServer
+    Properties:
+      Identifier: longstoryshort-identifier
+      Name: Long Story Short Resource Server
+      UserPoolId: !Ref LongStoryShortUserPool
+      Scopes:
+        - ScopeName: "write"
+          ScopeDescription: "Write access"
+        - ScopeName: "read"
+          ScopeDescription: "Read access"
+
+  # Cognito User Pool Domain
+  LongStoryShortUserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: "longstoryshort"
+      ManagedLoginVersion: 2
+      UserPoolId: !Ref LongStoryShortUserPool
+
+  # API Gateway with Cognito Authorizer
+  LongStoryShortApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Auth:
+        DefaultAuthorizer: LongStoryShortCognitoAuthorizer
+        AddDefaultAuthorizerToCorsPreflight: false
+        AddApiKeyRequiredToCorsPreflight: false
+        Authorizers:
+          LongStoryShortCognitoAuthorizer:
+            UserPoolArn: !GetAtt LongStoryShortUserPool.Arn
+            AuthorizationScopes:
+              - longstoryshort-identifier/read
+              - longstoryshort-identifier/write
+
+  # Lambda
+  ShortenUrlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: longstoryshort/
+      Handler: app.shortenUrl
+      Architectures:
+        - x86_64
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UrlShortenerTable
+      Events:
+        ShortenUrl:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LongStoryShortApi
+            Path: /surl
+            Method: post
+
+  # Lambda
+  ExpandUrlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: longstoryshort/
+      Handler: app.expandUrl
+      Architectures:
+        - x86_64
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UrlShortenerTable
+      Events:
+        ShortenUrl:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LongStoryShortApi
+            Path: /eurl
+            Method: get
+
+  # DynamoDB
+  UrlShortenerTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: UrlShortenerTable
+      AttributeDefinitions:
+        - AttributeName: ShortId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: ShortId
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      TimeToLiveSpecification:
+        AttributeName: "ExpiryTimestamp"
+        Enabled: true
+
+Outputs:
+  ShortenUrlApi:
+    Description: "API Gateway endpoint URL for Prod stage for ShortenUrl function"
+    Value: !Sub "https://${LongStoryShortApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/surl/"
+  ShortenUrlFunction:
+    Description: "ShortenUrl Lambda Function ARN"
+    Value: !GetAtt ShortenUrlFunction.Arn
+  ShortenUrlFunctionIamRole:
+    Description: "Implicit IAM Role created for ShortenUrl function"
+    Value: !GetAtt ShortenUrlFunctionRole.Arn
+  ExpandUrlApi:
+    Description: "API Gateway endpoint URL for Prod stage for ExpandUrl function"
+    Value: !Sub "https://${LongStoryShortApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/eurl/"
+  ExpandUrlFunction:
+    Description: "ExpandUrl Lambda Function ARN"
+    Value: !GetAtt ExpandUrlFunction.Arn
+  ExpandUrlFunctionIamRole:
+    Description: "Implicit IAM Role created for ExpandUrl function"
+    Value: !GetAtt ExpandUrlFunctionRole.Arn

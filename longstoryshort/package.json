@@ -1,0 +1,20 @@
+{
+  "name": "longstoryshort-backend",
+  "version": "1.0.0",
+  "description": "URL Shortener backend with NodeJS",
+  "main": "app.js",
+  "repository": "https://github.com/vmcy/longstoryshort-backend.git",
+  "author": "vmcy",
+  "license": "MIT",
+  "dependencies": {
+    "axios": ">=1.6.0"
+  },
+  "scripts": {
+    "test": "mocha tests/unit/"
+  },
+  "devDependencies": {
+    "@aws-sdk/lib-dynamodb": "^3.750.0",
+    "chai": "^4.5.0",
+    "mocha": "^10.8.2"
+  }
+}
