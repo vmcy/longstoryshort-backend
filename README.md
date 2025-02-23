@@ -62,6 +62,11 @@ EC2 or Serverless?
 - While it is easier to develop for deployment in an EC2, Serverless was chosen for it's performance, cost, and scalability.
 - Assuming the website traffic is low, Serverless will cost significantly lesser due to on-demand usage pricing, whereas EC2 will incur billing even when it is idling.
 
+PostgreSQL (relational) or DynamoDB (non-relational)?
+- Since this url shortener application uses a simple key-value lookup, utilising DynamoDB's performance and scalability is a better approach.
+- DynamoDB handles high volume of read/write operations more efficiently.
+- If there is traffic surge, DynamoDB can be configured to scale up automatically without any downtime.
+
 8-character short URL ID
 - Initially, there is concern where 8-character base36 short URL ID is not sufficient to avoid duplicates.
 - Increasing the number of character is not an ideal solution because it defeats the purpose of url shortener.
